@@ -1,5 +1,6 @@
 import argparse as ap
 import os
+import sys
 
 def parseArg():
 
@@ -99,6 +100,7 @@ def fill_temp_codes_tuple(temp_codes, rel_pos):
 
     return temp_codes
 
+
 def aliBuild(codes_arc, seq, temp_codes):
 
     print("Building alignment...")
@@ -118,16 +120,16 @@ def aliBuild(codes_arc, seq, temp_codes):
 
 def main():
 
-        path = parseArg()
+    path = parseArg()
 
-        retrieve_codes(path=path)
-        retrieve_sequence(path=path,codes_arc=codes_arc)
-        retrieve_template_codes(path=path)
-        retrieve_relative_postions(temp_codes=temp_codes)
-        fill_temp_codes_tuple(temp_codes=temp_codes, rel_pos=rel_pos)
-        aliBuild(codes_arc=codes_arc,seq=seq,temp_codes=temp_codes)
+    retrieve_codes(path=path)
+    retrieve_sequence(path=path,codes_arc=codes_arc)
+    retrieve_template_codes(path=path)
+    retrieve_relative_postions(temp_codes=temp_codes)
+    fill_temp_codes_tuple(temp_codes=temp_codes, rel_pos=rel_pos)
+    aliBuild(codes_arc=codes_arc,seq=retrieve_sequence(path=path,codes_arc=codes_arc),temp_codes=temp_codes)
 
-        print("Ahead with your models!")
+    print("Ahead with your models!")
 
 
 if __name__ == "__main__":
