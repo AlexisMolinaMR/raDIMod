@@ -191,10 +191,16 @@ class MyModel(loopmodel):
 
         #addition of distance restraints. THIS SHOULD BE DONE 5 TIMES, one for each alphabet.
         for c in range(0,160):
-            rsr.add(forms.gaussian(group=physical.xy_distance,feature=features.distance(at['CA: {}'.format(MI_dis[c][1])],at['CA: {}'.format(MI_dis[c][2])]), mean = float(MI_dis[c][3]), stdev = 2.5))
+            rsr.add(forms.gaussian(group=physical.xy_distance,
+                                    feature=features.distance(at['CA: {}'.format(MI_dis[c][1])],
+                                                                at['CA: {}'.format(MI_dis[c][2])]),
+                                                                    mean = float(MI_dis[c][3]), stdev = 2.5))
 
         for d in range(0,160):
-            rsr.add(forms.gaussian(group=physical.xy_distance,feature=features.distance(at['CA: {}'.format(DI_dis[d][1])],at['CA: {}'.format(DI_dis[d][2])]), mean = float(DI_dis[d][3]), stdev=2.5))
+            rsr.add(forms.gaussian(group=physical.xy_distance,
+                                    feature=features.distance(at['CA: {}'.format(DI_dis[d][1])],
+                                                                at['CA: {}'.format(DI_dis[d][2])]),
+                                                                    mean = float(DI_dis[d][3]), stdev=2.5))
 
         for w in range(0,len(posalpha),2):
             rsr.add(secondary_structure.alpha(self.residue_range('{}:'.format(posalpha[w]), '{}:'.format(posalpha[w+1]))))
@@ -223,7 +229,12 @@ def main():
 
     a = MyModel(env,
                 alnfile = path_ali,
-                knowns = ('4KD5_C_102', '4KD5_C_115', '4KD5_C_119', '4KD5_C_150', '4KD5_C_181', '4KD5_C_187', '4KD5_C_201', '4KD5_C_51', '4KD5_C_71', '4KD5_C_80', '4KD5_C_95', '2H5Y_B_11', '2H5Y_B_115', '2H5Y_B_124', '2H5Y_B_14', '2H5Y_B_146', '2H5Y_B_171', '2H5Y_B_219', '2H5Y_B_32', '2H5Y_B_39', '2H5Y_B_5', '2H5Y_B_54', '2H5Y_B_60', '2H5Y_B_74'),
+                knowns = ('4KD5_C_102', '4KD5_C_115', '4KD5_C_119',
+                '4KD5_C_150', '4KD5_C_181', '4KD5_C_187', '4KD5_C_201',
+                '4KD5_C_51', '4KD5_C_71', '4KD5_C_80', '4KD5_C_95', '2H5Y_B_11',
+                '2H5Y_B_115', '2H5Y_B_124', '2H5Y_B_14', '2H5Y_B_146', '2H5Y_B_171',
+                '2H5Y_B_219', '2H5Y_B_32', '2H5Y_B_39', '2H5Y_B_5', '2H5Y_B_54',
+                '2H5Y_B_60', '2H5Y_B_74'),
                 sequence = codes_arc[0],
                 assess_methods = assess.DOPE )
 
