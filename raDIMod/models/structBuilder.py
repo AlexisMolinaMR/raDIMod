@@ -237,8 +237,6 @@ def main():
                                     # (determines how many models to calculate)
     a.make()                        # do the actual homology modeling
 
-    print("Ahead with your models!")
-
 
 if __name__ == "__main__":
     main()
