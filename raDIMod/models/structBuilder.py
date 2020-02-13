@@ -111,7 +111,7 @@ def secondary_structure_alpha(path_realign):
     for i, line in enumerate(fp):
         if i == 3:
             s = line
-    #print(s)
+
     l = []
     for i in range(len(s)):
         if s[i] == "H" and s[i+1] == "H":
@@ -132,7 +132,6 @@ def secondary_structure_alpha(path_realign):
 
     posalpha.append(len(s)-s[::-1].index("H"))
 
-    #print(posalpha)
     return posalpha
 
 def secondary_structure_beta(path_realign):
@@ -162,7 +161,6 @@ def secondary_structure_beta(path_realign):
     posbeta.append(len(s)-s[::-1].index("E"))
 
     return posbeta
-    #print(posbeta)
 
 def raDI_contacts(path_radi):
     for filename in glob.glob(os.path.join(path_radi, '*.out')):
@@ -182,14 +180,13 @@ def raDI_contacts(path_radi):
             except:
                 pass
 
-    return MI_dis, DI_dis
+    return MI_dis.sort(key = lambda x: int(x[0])), DI_dis.sort(key = lambda x: int(x[0]))
 
 class MyModel(loopmodel):
     def special_restraints(self,alnfile):
         rsr = self.restraints
         at = self.atoms
 
-        #addition of distance restraints. THIS SHOULD BE DONE 5 TIMES, one for each alphabet.
         for c in range(0,160):
             rsr.add(forms.gaussian(group=physical.xy_distance,
                                     feature=features.distance(at['CA: {}'.format(MI_dis[c][1])],
@@ -221,10 +218,9 @@ def main():
 
     raDI_contacts(path_radi=path_radi)
 
-    log.verbose() # request verbose output
-    env = environ() # create a new MODELLER environment to build this model in
+    log.verbose()
+    env = environ()
 
-    # declare directories for input atom files
     env.io.atom_files_directory = ['.', path_pdb]
 
     a = MyModel(env,
