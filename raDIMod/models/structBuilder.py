@@ -93,7 +93,7 @@ def retrieve_relative_postions(temp_codes):
 
 
 def fill_temp_codes_tuple(temp_codes, rel_pos):
-    print("Pairing template codes and positions...")
+    print("Pairing template codes and positions...\n")
     for ele in range(len(rel_pos)):
         temp_codes[ele].append(rel_pos[ele])
 
@@ -107,12 +107,16 @@ def fill_temp_codes_tuple(temp_codes, rel_pos):
 def secondary_structure_alpha(path_realign):
 
     s = ""
+    print("Opening " + path_realign + '\n')
     fp = open(path_realign)
     for i, line in enumerate(fp):
         if i == 3:
             s = line
 
     l = []
+
+    print("Retrieving alpha helix positions...")
+
     for i in range(len(s)):
         if s[i] == "H" and s[i+1] == "H":
             l.append(i+1)
@@ -132,7 +136,12 @@ def secondary_structure_alpha(path_realign):
 
     posalpha.append(len(s)-s[::-1].index("H"))
 
-    return posalpha
+
+    if len(posalpha) > 0:
+        print("Alpha positions retrieved!")
+        return posalpha
+    else:
+        raise Exception("Unable to retrieve alpha positions. Take a look at the realign file.")
 
 def secondary_structure_beta(path_realign):
     s = ""
@@ -141,6 +150,9 @@ def secondary_structure_beta(path_realign):
         if i == 3:
             s = line
     l = []
+
+    print("Retrieving beta sheet positions...\n")
+
     for i in range(len(s)):
     	if s[i] == "E" and s[i+1] == "E":
     		l.append(i+1)
@@ -160,30 +172,43 @@ def secondary_structure_beta(path_realign):
 
     posbeta.append(len(s)-s[::-1].index("E"))
 
-    return posbeta
+    if len(posbeta) > 0:
+        print("Beta positions retrieved!\n")
+        return posbeta
+    else:
+        raise Exception("Unable to retrieve beta positions. Take a look at the realign file.")
 
 def raDI_contacts(path_radi):
     for filename in glob.glob(os.path.join(path_radi, '*.out')):
         file = open(filename).readlines()
+        print("Opening" + filename + '\n')
         for lines in file:
             k = lines.split()
             try:
                 if (k[19] == "yes" or k[19] == "no") and (k[1] != "-" or k[2] != "-"):
                     pos = (k[0],k[1],k[2],k[7],k[8],'MI')
                     MI_dis.append(pos)
+                    print("Retrieving Mutual Information...")
                     pos = ()
 
                 if (k[20] == "yes" or k[20] == "no") and (k[1] != "-" or k[2] != "-"):
                     pos = (k[0],k[4],k[5],k[9],k[10],'DI')
                     DI_dis.append(pos)
+                    print("Retrieving Direct Information")
                     pos = ()
             except:
                 pass
 
-    return MI_dis.sort(key = lambda x: int(x[0])), DI_dis.sort(key = lambda x: int(x[0]))
+    if len(MI_dis) > 0 and len(DI_dis) > 0:
+        print("Mutual and Direct information retrieved!\n")
+        return MI_dis.sort(key = lambda x: int(x[0])), DI_dis.sort(key = lambda x: int(x[0]))
+    else:
+        raise Exception("Couldn't retrieve MI and/or DI...take a look at raDI output.")
 
 class MyModel(loopmodel):
+    print("Calling MODELLER...")
     def special_restraints(self,alnfile):
+        print("Adding special restraints...")
         rsr = self.restraints
         at = self.atoms
 
@@ -204,6 +229,7 @@ class MyModel(loopmodel):
         for r in range(0,len(posbeta),2):
             rsr.add(secondary_structure.strand(self.residue_range('{}:'.format(posbeta[r]), '{}:'.format(posbeta[r+1]))))
 
+        print("To verbose mode ->\n")
 
 def main():
     path_arc, path_ali, path_realign, path_radi, path_pdb, num_models = parseArg()
