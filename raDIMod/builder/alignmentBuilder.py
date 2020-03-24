@@ -136,6 +136,11 @@ def dummy_alibuilder(seq, codes_arc, path_out):
 
     print("Dummy alignment created!\n")
 
+
+#def pdb_cutter(temp_codes):
+
+
+
 def main():
 
     path, path_out = parseArg()
