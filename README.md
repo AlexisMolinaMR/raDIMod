@@ -49,18 +49,18 @@ Basic execution, for further explanation execute the module with the `-h --help`
 #### Builder
 
  ```console
- python2 -i /home/user/XXXX/ 
+ python2 alignmentBuilder.py -i /home/user/XXXX/ 
  ```
  
  #### Models
  
   ```console
- python2 -i /home/user/XXXX/ 
+ python2 modelBuilder.py -i /home/user/XXXX/ 
  ```
  
  ##### Evaluation
 
  ```console
- python2 -i /home/user/XXXX/ 
+ python2 modelEval.py -i /home/user/XXXX/ 
  ```
  
