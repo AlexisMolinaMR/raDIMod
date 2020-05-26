@@ -35,15 +35,13 @@ pip install argparse
 pip install biopython
  ```
 - Modeller
+  - If under a regular Python distribution see: https://salilab.org/modeller/9.24/release.html#deb
   - If using conda
  ```console
 conda config --add channels salilab
 conda install modeller 
 ```
-   - If under a regular Python distribution see:
- 
-  https://salilab.org/modeller/9.24/release.html#deb
-
+   
 ### Execution
 
 Basic execution, for further explanation execute the module with the `-h --help` option.
