@@ -40,7 +40,7 @@ pip install biopython
 conda config --add channels salilab
 conda install modeller 
 ```
-  - If under a regular Python distribution see:
+   - If under a regular Python distribution see:
  
   https://salilab.org/modeller/9.24/release.html#deb
 
