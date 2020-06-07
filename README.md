@@ -2,7 +2,9 @@
 
 Repository for _ab initio_ 3D modeling. Using information extraced from [ArchDBmap](https://github.com/jaumebonet/archdbmap) and [RADI](https://github.com/structuralbioinformatics/RADI) and passing it into Modeller this set of scripts allow to create protein models just form sequence information.
 
-Author: Alexis Molina, SBI Laboratory. For any inquiry or problem please, contact me here: alexis.molina@alum.esci.upf.edu or post an _Issue_.
+Author: Alexis Molina, SBI Laboratory.
+
+For any inquiry or problem please, contact me here: alexis.molina@alum.esci.upf.edu or post an _Issue_.
 
 ## Brief explanation of modules
 
