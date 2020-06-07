@@ -258,6 +258,7 @@ def pdb_cutter(path, temp_codes):
     print("Templates writen and stored in " + path)
 
 
+
 def main():
 
     path = parseArg()
