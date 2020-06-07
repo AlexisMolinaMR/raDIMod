@@ -12,10 +12,10 @@ def parseArg():
 
     parser.add_argument("-i", "--arc", required=True, type=str, help="path to ArchDBmap output.")
     parser.add_argument("-a", "--ali", required=True, type=str, help="path to alignment file (ali.pir).")
-    parser.add_argument("-s", "--realign", required=True, type=str, help="path to secondary structure prediction (Realign).")
+    parser.add_argument("-s", "--realign", required=True, type=str, help="path to secondary structure prediction (.realign).")
     parser.add_argument("-r", "--radi", required=True, type=str, help="path to folder containing raDI output.")
     parser.add_argument("-p", "--pdb", required=True, type=str, help="path to folder containing template pdb structures.")
-    parser.add_argument("-m", "--models", required=False, type=int, help="number of models to build. Default set to 100 models")
+    parser.add_argument("-m", "--models", required=False, type=int, help="number of models to build.")
 
     args = parser.parse_args()
 
@@ -51,10 +51,12 @@ def retrieve_codes(path_arc):
     print("Opening " + path_arc + '\n')
     for lines in file:
         k = lines.split()
-        if "#" not in k[0][0] and k[0] not in codes_arc:
-            print("Retrieving code: " + k[0])
-            codes_arc.append(k[0])
-
+        try:
+            if "#" not in k[0][0] and k[0] not in codes_arc:
+                print("Retrieving code: " + k[0])
+                codes_arc.append(k[0])
+        except:
+            pass
     print("{} codes retrieved!\n".format(len(codes_arc)))
     return codes_arc
 
@@ -82,8 +84,11 @@ def retrieve_relative_postions(temp_codes):
         lengths = i[1].split(".")
         for j in (lengths):
             if len(j) > 1:
-                pair = (i[0].split("_")[2],str(int(i[0].split("_")[2])+len(j)),i[0].split("_")[1])
-                rel_pos.append(pair)
+                try:
+                    pair = (i[0].split("_")[2],str(int(i[0].split("_")[2])+len(j)),i[0].split("_")[1])
+                    rel_pos.append(pair)
+                except:
+                    pass
 
     if len(rel_pos) > 0:
         print("Relative positons retrieved successfully!\n")
@@ -102,9 +107,21 @@ def fill_temp_codes_tuple(temp_codes, rel_pos):
 
     print("Done!\n")
 
-    return tuple(temp_codes)
+    global cod
+    cod = ()
+
+    for tem in temp_codes:
+        print(tem[0])
+        cod += (tem[0],)
+
+    cod = cod[1:]
+
+    return cod
 
 def secondary_structure_alpha(path_realign):
+
+    global there_is_alpha
+    there_is_alpha = True
 
     s = ""
     print("Opening " + path_realign + '\n')
@@ -115,35 +132,44 @@ def secondary_structure_alpha(path_realign):
 
     l = []
 
-    print("Retrieving alpha helix positions...")
+    if "H" in s:
+        print("Retrieving alpha helix positions...")
+        for i in range(len(s)):
+            if s[i] == "H" and s[i+1] == "H":
+                l.append(i+1)
+            elif s[i] == "H" and s[i+1] != "H":
+                l.append(i+1)
 
-    for i in range(len(s)):
-        if s[i] == "H" and s[i+1] == "H":
-            l.append(i+1)
-        elif s[i] == "H" and s[i+1] != "H":
-            l.append(i+1)
+        global posalpha
+        posalpha = []
+        posalpha.append(s.index("H")+1)
 
-    global posalpha
-    posalpha = []
-    posalpha.append(s.index("H")+1)
+        i = 0
+        while i < len(l)-1:
+            if l[i] + 1 != l[i+1]:
+                posalpha.append(l[i])
+                posalpha.append(l[i+1])
+            i += 1
 
-    i = 0
-    while i < len(l)-1:
-        if l[i] + 1 != l[i+1]:
-            posalpha.append(l[i])
-            posalpha.append(l[i+1])
-        i += 1
-
-    posalpha.append(len(s)-s[::-1].index("H"))
+        posalpha.append(len(s)-s[::-1].index("H"))
 
 
-    if len(posalpha) > 0:
-        print("Alpha positions retrieved!")
-        return posalpha
+        if len(posalpha) > 0:
+            print("Alpha positions retrieved!")
+            return posalpha
+        else:
+            raise Exception("Unable to retrieve alpha positions. Take a look at the realign file.")
     else:
-        raise Exception("Unable to retrieve alpha positions. Take a look at the realign file.")
+        "No alpha positions in SS prediction. (.realign)"
+        there_is_alpha = False
+
+    return there_is_alpha
 
 def secondary_structure_beta(path_realign):
+
+    global there_is_beta
+    there_is_beta = True
+
     s = ""
     fp = open(path_realign)
     for i, line in enumerate(fp):
@@ -151,32 +177,38 @@ def secondary_structure_beta(path_realign):
             s = line
     l = []
 
-    print("Retrieving beta sheet positions...\n")
+    if "E" in s:
+        print("Retrieving beta sheet positions...\n")
 
-    for i in range(len(s)):
-    	if s[i] == "E" and s[i+1] == "E":
-    		l.append(i+1)
-    	elif s[i] == "E" and s[i+1] != "E":
-    		l.append(i+1)
+        for i in range(len(s)):
+        	if s[i] == "E" and s[i+1] == "E":
+        		l.append(i+1)
+        	elif s[i] == "E" and s[i+1] != "E":
+        		l.append(i+1)
 
-    global posbeta
-    posbeta = []
-    posbeta.append(s.index("E"))
+        global posbeta
+        posbeta = []
+        posbeta.append(s.index("E"))
 
-    i = 0
-    while i < len(l)-1:
-    	if l[i] + 1 != l[i+1]:
-    		posbeta.append(l[i])
-    		posbeta.append(l[i+1])
-    	i += 1
+        i = 0
+        while i < len(l)-1:
+        	if l[i] + 1 != l[i+1]:
+        		posbeta.append(l[i])
+        		posbeta.append(l[i+1])
+        	i += 1
 
-    posbeta.append(len(s)-s[::-1].index("E"))
+        posbeta.append(len(s)-s[::-1].index("E"))
 
-    if len(posbeta) > 0:
-        print("Beta positions retrieved!\n")
-        return posbeta
+        if len(posbeta) > 0:
+            print("Beta positions retrieved!\n")
+            return posbeta
+        else:
+            raise Exception("Unable to retrieve beta positions. Take a look at the realign file.")
     else:
-        raise Exception("Unable to retrieve beta positions. Take a look at the realign file.")
+        "No beta positions in SS prediction. (.realign)"
+        there_is_beta = False
+
+    return there_is_beta
 
 def raDI_contacts(path_radi):
     for filename in glob.glob(os.path.join(path_radi, '*.out')):
@@ -223,11 +255,12 @@ class MyModel(loopmodel):
                                     feature=features.distance(at['CA: {}'.format(DI_dis[d][1])],
                                                                 at['CA: {}'.format(DI_dis[d][2])]),
                                                                     mean = float(DI_dis[d][3]), stdev=2.5))
-
-        for w in range(0,len(posalpha),2):
-            rsr.add(secondary_structure.alpha(self.residue_range('{}:'.format(posalpha[w]), '{}:'.format(posalpha[w+1]))))
-        for r in range(0,len(posbeta),2):
-            rsr.add(secondary_structure.strand(self.residue_range('{}:'.format(posbeta[r]), '{}:'.format(posbeta[r+1]))))
+        if there_is_alpha:
+            for w in range(0,len(posalpha),2):
+                rsr.add(secondary_structure.alpha(self.residue_range('{}:'.format(posalpha[w]), '{}:'.format(posalpha[w+1]))))
+        if there_is_beta:
+            for r in range(0,len(posbeta),2):
+                rsr.add(secondary_structure.strand(self.residue_range('{}:'.format(posbeta[r]), '{}:'.format(posbeta[r+1]))))
 
         print("To verbose mode ->\n")
 
@@ -251,12 +284,7 @@ def main():
 
     a = MyModel(env,
                 alnfile = path_ali,
-                knowns = ('4KD5_C_102', '4KD5_C_115', '4KD5_C_119',
-                '4KD5_C_150', '4KD5_C_181', '4KD5_C_187', '4KD5_C_201',
-                '4KD5_C_51', '4KD5_C_71', '4KD5_C_80', '4KD5_C_95', '2H5Y_B_11',
-                '2H5Y_B_115', '2H5Y_B_124', '2H5Y_B_14', '2H5Y_B_146', '2H5Y_B_171',
-                '2H5Y_B_219', '2H5Y_B_32', '2H5Y_B_39', '2H5Y_B_5', '2H5Y_B_54',
-                '2H5Y_B_60', '2H5Y_B_74'),
+                knowns = cod,
                 sequence = codes_arc[0],
                 assess_methods = assess.DOPE )
 
@@ -265,10 +293,10 @@ def main():
     a.loop.ending_model=4
     a.loop.md_level=refine.slow
 
-    a.starting_model= 0             # index of the first model
-    a.ending_model  = num_models    # index of the last model
-                                    # (determines how many models to calculate)
-    a.make()                        # do the actual homology modeling
+    a.starting_model= 0
+    a.ending_model  = num_models
+
+    a.make()
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from modeller.scripts import complete_pdb
 from modeller import *
 from modeller.automodel import *
 from Bio.PDB import *
+from Bio.PDB import PDBIO
 
 
 def parseArg():
@@ -13,16 +14,16 @@ def parseArg():
     parser = ap.ArgumentParser()
 
     parser.add_argument("-i", "--input", required=True, type=str, help="path to generated PDB structures.")
-    parser.add_argument("-r", "--reference", required=True, type=str, help="path to reference PDB structure.")
     parser.add_argument("-p", "--path_ali", required=True, type=str, help="path to dummy alignment.")
+    parser.add_argument("-c", "--code", required=True, type=str, help="Code.")
 
     args = parser.parse_args()
 
     path = args.input
-    reference_path = args.reference
     path_ali = args.path_ali
+    code = args.code
 
-    return path, reference_path, path_ali
+    return path, path_ali, code
 
 def dope_score(path):
 
@@ -59,35 +60,80 @@ def dope_score(path):
 
     return ranked_dope_scores, best_struct
 
-def pdb_cleaner(best_struct, reference_path, path_ali):
+def get_reference_pdb(path_ali, code):
+
+    chain_A = {}
+    chain_B = {}
+
+    io = PDBIO()
+    pdb_list = PDBList()
+
+
+    pdb_list.retrieve_pdb_file(code, file_format="pdb", pdir=path_ali)
+
+    with open(path_ali + "pdb" + code.lower() + ".ent", 'r') as pdb:
+        for lines in pdb:
+            line = lines.split()
+            if line[0] == "ATOM" or (line[0] == "HETATM" and line[3] in ["MSE","KCX","LYS"]):
+                if line[4] == "A":
+                    if not chain_A:
+                        chain_A["A"] = lines
+                    else:
+                        chain_A["A"] += lines
+
+                elif line[4] == "B":
+                    if not chain_B:
+                        chain_B["B"] = lines
+                    else:
+                        chain_B["B"] += lines
+
+
+    try:
+        with open(path_ali + code + "_A.pdb", "w") as pdb_out_A:
+            pdb_out_A.write(chain_A["A"])
+        with open(path_ali + code + "_B.pdb", "w") as pdb_out_B:
+            pdb_out_B.write(chain_B["B"])
+    except:
+        pass
+
+
+def pdb_cleaner(best_struct, path_ali, code):
+
+    dir = os.getcwd()
+    os.chdir(path_ali)
+
+    global chain_to_use
+    chain_to_use = best_struct[1].split("/")[-1].split(".")[0].split("_")[1]
 
     log.verbose()
     env = environ()
 
-    env.io.atom_files_directory = [reference_path] #get only path
+    env.io.hetatom= True
+    io_data.hetatm = True
+
+    env.io.atom_files_directory = [path_ali]
 
     a = automodel(env,
                   alnfile = path_ali + best_struct[1].split("/")[-1].split(".")[0] + "_dummy_ali.pir",
-                  knowns = ("1ATG"),
-                  sequence = best_struct[1].split("/")[-1].split(".")[0])
+                  knowns = code + "_" + chain_to_use,
+                  sequence = best_struct[1].split("/")[-1].split(".")[0].split("_")[0])
 
     a.starting_model = 1
     a.ending_model = 1
 
     a.make()
 
-#    ref = a.get_model_filename()
+    os.chdir(path_ali)
 
-#    return ref
 
-def rmsd(path, ranked_dope_scores):
+def rmsd(path, path_ali, ranked_dope_scores, code):
 
     global evaluation
     evaluation = []
     global ranked_evaluation
     ranked_evaluation = []
 
-    reference_structure = "/home/alexis/Desktop/raDIMod/raDIMod/evaluation/1ATG_A.B99990001.pdb"
+    reference_structure = path_ali +  code + ".B99990001.pdb"
 
     parser = PDBParser()
 
@@ -96,7 +142,9 @@ def rmsd(path, ranked_dope_scores):
 
     for filename in glob.glob(os.path.join(path, '*.pdb')):
         structure = parser.get_structure('struct', filename)
+
         structure = list(structure.get_atoms())
+
 
         print("Superimposing structures...\n")
 
@@ -118,7 +166,7 @@ def rmsd(path, ranked_dope_scores):
     return ranked_evaluation
 
 def score_writer(path, ranked_evaluation):
-    with open(path + 'evaluation.txt', 'w') as dope_file:
+    with open(path + best_struct[1].split("/")[-1].split(".")[0] + '_evaluation.txt', 'w') as dope_file:
         print("\nWriting strucutres ranking...\n")
         dope_file.write("Structure\t Dope score\t RMSD\n")
         for score_file in ranked_evaluation:
@@ -132,11 +180,12 @@ def score_writer(path, ranked_evaluation):
 
 def main():
 
-    path, reference_path, path_ali = parseArg()
+    path, path_ali, code = parseArg()
 
+    get_reference_pdb(path_ali=path_ali, code=code)
     dope_score(path=path)
-    pdb_cleaner(best_struct=best_struct, reference_path=reference_path, path_ali=path_ali)
-    rmsd(path=path, ranked_dope_scores=ranked_dope_scores)
+    pdb_cleaner(best_struct=best_struct, path_ali=path_ali, code=code)
+    rmsd(path=path, path_ali=path_ali, ranked_dope_scores=ranked_dope_scores, code=code)
     score_writer(path=path, ranked_evaluation=ranked_evaluation)
 
 
