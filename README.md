@@ -1,6 +1,6 @@
 # raDImod
 
-Repository for _ab initio_ 3D modeling. Using information extraced from [ArchDBmap](https://github.com/jaumebonet/archdbmap) and [RADI](https://github.com/structuralbioinformatics/RADI) and passing it into Modeller with set of scripts allow to create protein models just form sequence information.
+Repository for _ab initio_ 3D modeling. Using information extraced from [ArchDBmap](https://github.com/jaumebonet/archdbmap) and [RADI](https://github.com/structuralbioinformatics/RADI) and passing it into Modeller this set of scripts allow to create protein models just form sequence information.
 
 ## Brief explanation of modules
 
@@ -27,19 +27,19 @@ This module needs the alignment file obtained when executing **ArchDBmap**. _XXX
  ### Requirements
 
   - argparse
-  ```{console}
+  ```
   pip install argparse
   ```
 
   - Biopython
-  ```{console}
+  ```
   pip install biopython
   ```
 
   - Modeller
     - If under a regular Python distribution see: https://salilab.org/modeller/9.24/release.html#deb
     - If using conda:
-    ```{console}
+    ```
     conda config --add channels salilab
     conda install modeller
     ```
